@@ -54,3 +54,26 @@ Pebble is a small, simple load-store architecture that uses a 9-bit instruction 
 - **Single-port write** - synchronized updates
 - **Write enable control** - prevents accidental overwrites 
 
+# Data Memory
+**Purpose**
+
+
+# Instruction Memory
+**Purpose**
+
+
+# Program Counter
+**Purpose**
+
+
+# Control
+**Purpose**
+
+
+# MUX
+**Purpose**
+
+
+# Top
+**Purpose**
+
