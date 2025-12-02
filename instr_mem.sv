@@ -1,6 +1,6 @@
 // Instruction Memory Module
 // Reads machine_code.txt and output instruction at address
-module instruction_memory #(
+module instr_mem #(
     parameter ADDR_WIDTH = 10,
     parameter DATA_WIDTH = 9,
     parameter MEM_DEPTH  = 1024
