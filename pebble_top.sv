@@ -106,14 +106,14 @@ module pebble_top(
   );
 
   register_file RF1(
-    .Clk(Clk),
-    .WriteEnable(WenR),
-    .ReadAddr1(src_reg1),
-    .ReadAddr2(src_reg2),
-    .WriteAddr(dest_reg),
-    .WriteData(WdatR),
-    .ReadData1(RdatA),
-    .ReadData2(RdatB)
+    .clk(Clk),
+    .write_enable(WenR),
+    .read_a(src_reg1),
+    .read_b(src_reg2),
+    .write_addr(dest_reg),
+    .write_data(WdatR),
+    .read_a_data(RdatA),
+    .read_b_data(RdatB)
   );
 
   alu ALU1(
