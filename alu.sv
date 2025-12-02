@@ -2,7 +2,7 @@ module alu(
   input [2:0] alu_op,
   input [7:0] r0, r1,
   output logic[7:0] result,
-  output logic zero);
+  output logic done);
 
 always_comb begin
   case(alu_op)
@@ -16,5 +16,5 @@ always_comb begin
     3'b111: result = (r0 == r1) ? 8'b1 : 8'b0; // cmp
   endcase
 end
-  assign zero = (result == 8'b0);
+  assign done = (result == 8'b0);
 endmodule
