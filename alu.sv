@@ -2,7 +2,7 @@ module alu(
   input [2:0] alu_op,
   input [7:0] r0, r1,
   output logic[7:0] result,
-  output logic done);
+  output logic zero);
 
 always_comb begin
   case(alu_op)
