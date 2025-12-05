@@ -124,7 +124,7 @@ module pebble_top(
     .zero(Zero)
   );
 
-  data_memory DM1(
+  data_mem DM1(
     .Clk(Clk),
     .WriteEnable(WenD),
     .WriteData(WdatD),

@@ -1,5 +1,5 @@
 // Data Memory Module
-module data_memory(
+module data_mem(
   input        Clk,
                WriteEnable,
   input  [7:0] WriteData,
