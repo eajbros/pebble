@@ -16,5 +16,5 @@ always_comb begin
     3'b111: result = (r0 == r1) ? 8'b1 : 8'b0; // cmp
   endcase
 end
-  assign done = (result == 8'b0);
+  assign zero = (result == 8'b0);
 endmodule
