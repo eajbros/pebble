@@ -48,6 +48,8 @@ module control(
         mem_load = instruction[6];
         src_reg1 = {1'b0, instruction[5]};  // Register to load to / store from
         mem_addr = instruction[4:0];
+        if(mem_load)
+          dest_reg = {1'b0, instruction[5]};  // Load target register (R0/R1)
       end
 
       2'b11: begin  // Branch: [type(2) | done(1) | reg1(2) | reg2(2) | jump_reg(2)]

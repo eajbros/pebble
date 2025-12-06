@@ -29,6 +29,7 @@ module TopLevel(
   // Register File wires
   wire [7:0] RdatA;      // RF data out (src1)
   wire [7:0] RdatB;      // RF data out (src2)
+  wire [7:0] RdatC;      // RF data out (branch target)
   wire [7:0] WdatR;      // RF data in
   wire       WenR;       // RF write enable
 
@@ -75,7 +76,7 @@ module TopLevel(
 
   // Branch/Jump logic
   assign JumpEnable = (instr_type == 2'b11) && !done_flag && Zero;  // BEQ when zero
-  assign JumpAddr = {2'b0, RdatA[7:0]};    // Jump address from register (branch_reg)
+  assign JumpAddr = {2'b0, RdatC[7:0]};    // Jump address from register (branch_reg)
 
   // Done flag output
   assign done = done_flag;
@@ -113,10 +114,12 @@ module TopLevel(
     .write_enable(WenR),
     .read_a(src_reg1),
     .read_b(src_reg2),
+    .read_c(branch_reg),
     .write_addr(dest_reg),
     .write_data(WdatR),
     .read_a_data(RdatA),
-    .read_b_data(RdatB)
+    .read_b_data(RdatB),
+    .read_c_data(RdatC)
   );
 
   alu ALU1(

@@ -24,7 +24,7 @@ module data_mem(
     end
   end
 
-  // Read data
-  assign DataOut = (DataAddress < 4) ? mem_core[DataAddress] : core[DataAddress];
+  // Read data (always use core so preloaded values are visible to CPU)
+  assign DataOut = core[DataAddress];
 
 endmodule
