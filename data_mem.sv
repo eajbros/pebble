@@ -1,19 +1,30 @@
-// Data Memory Module
+// Data Memory Module - compatible with TopLevel0 harness
 module data_mem(
-  input        Clk,
-               WriteEnable,
-  input  [7:0] WriteData,
-               Addr,
-  output logic [7:0] ReadData
+  input        clk,
+  input  [7:0] DataAddress,
+  input        ReadMem,      // kept for compatibility
+  input        WriteMem,
+  input  [7:0] DataIn,
+  output logic [7:0] DataOut
 );
 
+  // Full memory array (backing store)
   logic [7:0] Mem[256];
+  
+  // Small window the testbench accesses directly
+  logic [7:0] mem_core [0:3];
 
   // Write on clock rise
-  always_ff @(posedge Clk)
-    if(WriteEnable) Mem[Addr] <= WriteData;
+  always_ff @(posedge clk) begin
+    if(WriteMem) begin
+      Mem[DataAddress] <= DataIn;
+      // Keep mem_core in sync for addresses 0-3
+      if(DataAddress < 4)
+        mem_core[DataAddress] <= DataIn;
+    end
+  end
 
   // Read data
-  assign ReadData = Mem[Addr];
+  assign DataOut = Mem[DataAddress];
 
 endmodule

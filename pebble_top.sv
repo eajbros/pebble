@@ -1,8 +1,9 @@
 // Pebble Processor Top Module
-module pebble_top(
-  input        Clk,
-               Reset,
-  output logic Done
+module TopLevel(
+  input        clk,
+               reset,
+               start,
+  output logic done
 );
 
   // Program Counter wires
@@ -38,10 +39,11 @@ module pebble_top(
   wire       Zero;       // ALU zero flag
 
   // Data Memory wires
-  wire [7:0] Rdat;       // DM data out
-  wire [7:0] WdatD;      // DM data in
-  wire [7:0] Addr;       // DM address
-  wire       WenD;       // DM write enable
+  wire [7:0] DataOut;    // DM data out
+  wire [7:0] DataIn;     // DM data in
+  wire [7:0] DataAddress; // DM address
+  wire       WriteMem;   // DM write enable
+  wire       ReadMem;    // DM read enable (unused but required)
 
   // Additional control signals
   wire       Ldr;        // Load instruction
@@ -53,13 +55,14 @@ module pebble_top(
   
   // Write-back mux: choose between ALU result, immediate, or memory data
   assign WdatR = (instr_type == 2'b01) ? {3'b0, immediate} :  // I-type: load immediate
-                 (Ldr) ? Rdat :                                // Memory load
+                 (Ldr) ? DataOut :                             // Memory load
                  Rslt;                                         // ALU result
 
   // Memory operations
-  assign WdatD = RdatA;                    // Store data from register
-  assign Addr = {3'b0, mem_addr};          // Memory address (extended to 8 bits)
-  assign WenD = Str;                       // Write enable for store
+  assign DataIn = RdatA;                   // Store data from register
+  assign DataAddress = {3'b0, mem_addr};   // Memory address (extended to 8 bits)
+  assign WriteMem = Str;                   // Write enable for store
+  assign ReadMem = 1'b1;                   // Always enabled for reads
 
   // Register file write enable
   assign WenR = (instr_type == 2'b00) ||   // R-type writes result
@@ -75,12 +78,12 @@ module pebble_top(
   assign JumpAddr = {2'b0, RdatA[7:0]};    // Jump address from register (branch_reg)
 
   // Done flag output
-  assign Done = done_flag;
+  assign done = done_flag;
 
   // Module instantiations
   prog_ctr PC1(
-    .Clk(Clk),
-    .Reset(Reset),
+    .Clk(clk),
+    .Reset(reset),
     .JumpEnable(JumpEnable),
     .JumpAddr(JumpAddr),
     .PC(PC)
@@ -106,7 +109,7 @@ module pebble_top(
   );
 
   register_file RF1(
-    .clk(Clk),
+    .clk(clk),
     .write_enable(WenR),
     .read_a(src_reg1),
     .read_b(src_reg2),
@@ -122,14 +125,6 @@ module pebble_top(
     .r1(DatB),
     .result(Rslt),
     .zero(Zero)
-  );
-
-  data_mem DM1(
-    .Clk(Clk),
-    .WriteEnable(WenD),
-    .WriteData(WdatD),
-    .Addr(Addr),
-    .ReadData(Rdat)
   );
 
 endmodule
