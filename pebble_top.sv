@@ -127,4 +127,6 @@ module TopLevel(
     .zero(Zero)
   );
 
+  data_mem       data_mem1(.*);
+
 endmodule
