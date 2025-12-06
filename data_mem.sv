@@ -25,6 +25,6 @@ module data_mem(
   end
 
   // Read data
-  assign DataOut = Mem[DataAddress];
+  assign DataOut = (DataAddress < 4) ? mem_core[DataAddress] : Mem[DataAddress];
 
 endmodule
