@@ -9,7 +9,7 @@ module data_mem(
 );
 
   // Full memory array (backing store)
-  logic [7:0] Mem[256];
+  logic [7:0] core[256];
   
   // Small window the testbench accesses directly
   logic [7:0] mem_core [0:3];
@@ -17,7 +17,7 @@ module data_mem(
   // Write on clock rise
   always_ff @(posedge clk) begin
     if(WriteMem) begin
-      Mem[DataAddress] <= DataIn;
+      core[DataAddress] <= DataIn;
       // Keep mem_core in sync for addresses 0-3
       if(DataAddress < 4)
         mem_core[DataAddress] <= DataIn;
@@ -25,6 +25,6 @@ module data_mem(
   end
 
   // Read data
-  assign DataOut = (DataAddress < 4) ? mem_core[DataAddress] : Mem[DataAddress];
+  assign DataOut = (DataAddress < 4) ? mem_core[DataAddress] : core[DataAddress];
 
 endmodule
