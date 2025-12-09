@@ -13,7 +13,7 @@ module instr_mem #(
 
     // Load machine code from file
     initial begin
-        $readmemb("instr_mem1.txt", mem);
+        $readmemb("instrs.txt", mem);
     end
 
     // Output instruction at address
