@@ -22,7 +22,8 @@ module TopLevel(
   wire [1:0] dest_reg;
   wire [4:0] immediate;
   wire       mem_load;
-  wire [4:0] mem_addr;
+  wire [1:0] mem_data_reg;
+  wire [1:0] mem_addr_reg;
   wire       done_flag;
   wire [1:0] branch_reg;
 
@@ -60,8 +61,8 @@ module TopLevel(
                  Rslt;                                         // ALU result
 
   // Memory operations
-  assign DataIn = RdatA;                   // Store data from register
-  assign DataAddress = {3'b0, mem_addr};   // Memory address (extended to 8 bits)
+  assign DataIn = RdatB;                   // Store data always from RdatB (src_reg2)
+  assign DataAddress = RdatA[7:0];         // Address always from RdatA (addr_reg via src_reg1)
   assign WriteMem = Str;                   // Write enable for store
   assign ReadMem = 1'b1;                   // Always enabled for reads
 
@@ -104,7 +105,8 @@ module TopLevel(
     .dest_reg(dest_reg),
     .immediate(immediate),
     .mem_load(mem_load),
-    .mem_addr(mem_addr),
+    .mem_data_reg(mem_data_reg),
+    .mem_addr_reg(mem_addr_reg),
     .done_flag(done_flag),
     .branch_reg(branch_reg)
   );
