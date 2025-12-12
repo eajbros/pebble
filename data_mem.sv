@@ -21,7 +21,6 @@ module data_mem(
       // Keep mem_core in sync for addresses 0-3
       if(DataAddress < 4)
         mem_core[DataAddress] <= DataIn;
-      $display("%0t : MEM[%0d] <= %0d", $time, DataAddress, DataIn);
     end
   end
 
