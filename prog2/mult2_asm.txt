@@ -1,0 +1,61 @@
+# 8-bit Unsigned Multiplication (Basic Version - No Carry)
+# A * B using repeated addition
+# Input: mem[0]=A (multiplicand), mem[1]=B (multiplier)
+# Output: mem[2]=high byte (always 0 for now), mem[3]=low byte
+# Limitation: Only handles products ≤ 255
+#
+# Algorithm:
+#   result = 0
+#   for (counter = B; counter > 0; counter--)
+#       result += A
+#
+# Memory usage:
+#   mem[0] = A (input)
+#   mem[1] = B (input)
+#   mem[2] = result high byte (output, always 0)
+#   mem[3] = result low byte (output)
+#   mem[4] = loop counter (decrements from B to 0)
+
+# PC  Instruction         Binary        Description
+# --  -----------------   ------------  ---------------------------------
+0:    LI R0, 0            010000000     # R0 = 0 (for initialization)
+1:    LI R2, 2            011000010     # R2 = 2 (address)
+2:    SW R0, R2           100001000     # mem[2] = 0 (high byte)
+3:    LI R2, 3            011000011     # R2 = 3 (address)
+4:    SW R0, R2           100001000     # mem[3] = 0 (low byte)
+
+5:    LI R2, 1            011000001     # R2 = 1 (address of B)
+6:    LW R1, R2           101011000     # R1 = mem[1] = B
+7:    LI R3, 4            011100100     # R3 = 4 (counter address)
+8:    SW R1, R3           100011100     # mem[4] = B (initialize counter)
+
+# LOOP: Check if counter == 0
+9:    LW R1, R3           101011100     # R1 = mem[4] = counter (R3=4)
+10:   LI R0, 0            010000000     # R0 = 0 (for comparison)
+11:   LI R2, 27           011011011     # R2 = 27 (DONE address)
+12:   BEQ R1, R0, R2      110010010     # if counter==0, goto DONE
+
+# Load A and add to result
+13:   LI R2, 0            011000000     # R2 = 0 (address of A)
+14:   LW R0, R2           101001000     # R0 = mem[0] = A
+15:   LI R2, 3            011000011     # R2 = 3 (result address)
+16:   LW R1, R2           101011000     # R1 = mem[3] = result_low
+17:   ADD R0, R0, R1      000000100     # R0 = A + result_low
+18:   SW R0, R2           100001000     # mem[3] = new result_low
+
+# Decrement counter
+19:   LI R3, 4            011100100     # R3 = 4 (counter address)
+20:   LW R1, R3           101011100     # R1 = mem[4] = counter
+21:   LI R0, 1            010000001     # R0 = 1
+22:   SUB R1, R1, R0      000011001     # R1 = counter - 1
+23:   SW R1, R3           100011100     # mem[4] = counter - 1
+
+# Unconditional jump to LOOP
+24:   LI R0, 0            010000000     # R0 = 0
+25:   LI R2, 9            011001001     # R2 = 9 (LOOP address)
+26:   BEQ R0, R0, R2      110000010     # goto LOOP (0+0=0 always true)
+
+# DONE: Halt
+27:   BEQ R0, R0, R0      111000000     # Halt with done flag
+
+# Total: 28 instructions

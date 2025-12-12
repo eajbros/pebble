@@ -65,6 +65,14 @@ module TopLevel(
   assign DataAddress = RdatA[7:0];         // Address always from RdatA (addr_reg via src_reg1)
   assign WriteMem = Str;                   // Write enable for store
   assign ReadMem = 1'b1;                   // Always enabled for reads
+  
+  // Debug memory operations
+  always_ff @(posedge clk) begin
+    if(Str)
+      $display("%0t : STORE: MEM[%0d] <= %0d (from RdatB)", $time, DataAddress, DataIn);
+    if(Ldr)
+      $display("%0t : LOAD: R%0d <= MEM[%0d] = %0d", $time, dest_reg, DataAddress, DataOut);
+  end
 
   // Register file write enable
   assign WenR = (instr_type == 2'b00) ||   // R-type writes result
@@ -81,6 +89,11 @@ module TopLevel(
 
   // Done flag output
   assign done = done_flag;
+
+  always_ff @(posedge clk) begin
+    if(done_flag)
+      $display("%0t : DONE FLAG SET", $time);
+  end
 
   // Module instantiations
   prog_ctr PC1(

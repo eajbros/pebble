@@ -15,7 +15,10 @@ module register_file(
 
   // synchronous write
   always_ff @(posedge clk)
-    if(write_enable) core[write_addr] <= write_data;
+    if(write_enable) begin
+      core[write_addr] <= write_data;
+      $display("%0t : R%0d <= %0d", $time, write_addr, write_data);
+    end
 
   // asynchronous read
   assign read_a_data = core[read_a];
