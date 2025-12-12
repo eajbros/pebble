@@ -13,7 +13,7 @@ always_comb begin
     3'b100: result = r0 ^ r1;  // xor
     3'b101: result = r0 << 1;  // shl
     3'b110: result = r0 >> 1;  // shr
-    3'b111: result = (r0 == r1) ? 8'b1 : 8'b0; // cmp
+    3'b111: result = (r0 < r1) ? 8'b1 : 8'b0; // slt (set if less than, unsigned)
   endcase
 end
   assign zero = (result == 8'b0);
