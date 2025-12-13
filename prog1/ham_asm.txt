@@ -1,160 +1,204 @@
-# Hamming Distance Calculator - All Pairs
-# Compares all pairs in 16-byte array and finds min/max distances
-# Array at mem[0-15], results: mem[16]=min, mem[17]=max
+# Closest pair with Hamming Distance
 
-# ISA Format Reference:
-# I-type:  01 | dest(2) | imm(5)
-# Memory:  10 | load(1) | data_reg(2) | addr_reg(2) | unused(2)
-# R-type:  00 | func(3) | src1(1) | src2(1) | dest(2)
-# Branch:  11 | done(1) | r1(2) | r2(2) | jump_reg(2)
+# initialize constants and scratch memory
+000: LI R0, 8
+001: LI R2, 16
+002: LI R2, 8
+003: SW R0, R2          # mem[8] = 8 (number of bits per value)
 
-# ===== INITIALIZATION =====
-0:  LI   R2, 8              # R2 = 8 (initial min value)
-1:  LI   R2, 16             # R2 = 16 (address for min storage)
-2:  SW   R2, R2             # mem[16] = 8 (initialize min)
-3:  LI   R2, 0              # R2 = 0 (initial max value)
-4:  SW   R2, R2             # mem[17] = 0 (initialize max)
-5:  LI   R2, 0              # R2 = 0
-6:  LI   R2, 19             # R2 = 19
-7:  SW   R2, R3             # mem[12] = 0 (i=0)
-8:  LI   R2, 15             # R2 = 15 (constant for loop bound)
-9:  LI   R2, 20             # R2 = 20 (address 13)
-10: SW   R2, R3             # mem[13] = 15 (loop bound constant)
-11: LI   R2, 1              # R2 = 1 (constant for increment)
-12: LI   R2, 18             # R2 = 18 (address 10)
-13: SW   R2, R2             # mem[10] = 1 (constant ONE)
+004: LI R0, 0
+005: LI R2, 9
+006: SW R0, R2          # mem[9] = 0 (constant zero)
 
-# ===== OUTER LOOP: for(i=0; i<15; i++) =====
-14: OUTER:
-15: LI   R3, 19             # R3 = 19 (address of i)
-16: LW   R3, R3             # R3 = i (load current i value)
-17: LI   R2, 0              # R2 = 0
-18: SW   R2, R3             # Store i to mem[12] temporarily
-19: LI   R2, 15             # R2 = 15
-20: LI   R3, 20             # R3 = 20 (address 13)
-21: LW   R3, R3             # R3 = 15 (load loop bound)
-22: XOR  R3, R2, R2         # R2 = i ^ 15 (check if i==15)
-23: LI   R2, 0              # R2 = 0
-24: SW   R2, R3             # Store comparison result
-25: BEQ  R2, R2, R3         # If i==15, exit to DONE
-26: LI   R2, 1              # R2 = 1
-27: LI   R2, 18             # R2 = 18 (address 10)
-28: LI   R2, 0              # R2 = 0
-29: SW   R2, R3             # Prepare for j = i+1
-30: LW   R3, R3             # Load i
+007: LI R0, 0
+008: LI R2, 19
+009: LI R2, 12
+010: SW R0, R2          # mem[12] = 0 (current distance accumulator)
 
-# ===== COMPUTE j = i + 1 =====
-31: LI   R3, 18             # R3 = 18 (address 10)
-32: LW   R3, R2             # R2 = 1 (constant ONE)
-33: LI   R3, 19             # R3 = 19 (address 12)
-34: LW   R3, R3             # R3 = i
-35: ADD  R3, R2, R2         # R2 = i + 1 (j = i+1)
-36: LI   R3, 17             # R3 = 17 (address 10)
-37: SW   R2, R3             # mem[10] = j
+011: LI R0, 15
+012: LI R2, 20
+013: LI R2, 13
+014: SW R0, R2          # mem[13] = 15 (last index in array)
 
-# ===== INNER LOOP: for(j=i+1; j<16; j++) =====
-38: INNER:
-39: LI   R2, 17             # R2 = 17 (address of j)
-40: LI   R3, 16             # R3 = 16 (loop bound)
-41: LW   R2, R2             # R2 = j
-42: XOR  R2, R3, R2         # R2 = j ^ 16
-43: LI   R3, 17             # R3 = 17 (address 10)
-44: SW   R2, R3             # Store j comparison result
-45: BEQ  R2, R2, R3         # If j==16, jump to NEXT_I
+015: LI R0, 1
+016: LI R2, 18
+017: LI R2, 10
+018: SW R0, R2          # mem[10] = 1 (increment / mask constant)
 
-# ===== LOAD A[i] AND A[j] =====
-46: LI   R2, 18             # R2 = 18 (address 10)
-47: LI   R3, 18             # R3 = 18
-48: LW   R3, R3             # R3 = i (load index i)
-49: LW   R2, R3             # R2 = A[i] (indexed load)
-50: LI   R3, 17             # R3 = 17 (address 10)
-51: LW   R3, R3             # R3 = j (load index j)
-52: LW   R3, R3             # R3 = A[j] (indexed load)
 
-# ===== COMPUTE XOR AND STORE n =====
-53: XOR  R2, R3, R2         # R2 = A[i] ^ A[j] (difference mask)
-54: SW   R2, R3             # mem[11] = n (XOR result)
+# load current distance and do setup before main loop
+019: LI R3, 19
+020: LI R2, 12
+021: LW R0, R2          # R0 = current distance
+022: ADD R2, R0, R0     # filler ALU op
+023: LI R2, 12
+024: SW R0, R2          # store distance back
 
-# ===== INITIALIZE BIT COUNT =====
-55: LI   R2, 0              # R2 = 0
-56: SW   R2, R3             # mem[14] = 0 (count = 0)
 
-# ===== BIT COUNTING LOOP =====
-57: BIT_LOOP:
-58: LI   R1, 1              # R1 = 1 (constant for masking)
-59: LI   R3, 18             # R3 = 18 (address 11)
-60: LW   R2, R3             # R2 = n (load current n)
-61: LW   R3, R3             # R3 = n
-62: AND  R2, R3, R3         # R3 = n & 1 (check LSB)
-63: LW   R2, R2             # R2 = n
-64: LI   R2, 18             # R2 = 18 (address 14)
-65: LW   R2, R2             # R2 = count
-66: ADD  R2, R3, R2         # R2 = count + (n&1)
-67: LI   R3, 18             # R3 = 18 (address 14)
-68: SW   R2, R3             # mem[14] = count (update count)
-69: LI   R3, 18             # R3 = 18 (address 11)
-70: LW   R2, R3             # R2 = n
-71: SHR  R2, R2             # R2 = n >> 1 (shift right)
-72: SW   R2, R3             # mem[11] = n >> 1 (update n)
-73: LI   R3, 18             # R3 = 18 (address 11)
-74: LW   R2, R3             # R2 = n (reload n)
-75: LI   R3, 31             # R3 = 31 (loop back address)
-76: BEQ  R2, R2, R3         # If n==0, exit loop; else continue
+# check whether to enter main pair-processing loop
+025: LI R0, 15
+026: LI R3, 28          # jump target for main computation
+027: LI R2, 12
+028: LW R1, R2          # R1 = current distance
+029: OR R2, R0, R1
+030: BEQ R0, R2, R3     # if distance == 0, jump into loop body
 
-# ===== COMPARE AND UPDATE MIN =====
-77: LI   R2, 18             # R2 = 18 (address 13)
-78: LI   R3, 19             # R3 = 19 (address 16)
-79: LW   R3, R3             # R3 = min (current min)
-80: LW   R2, R2             # R2 = count
-81: XOR  R2, R3, R3         # R3 = count ^ min
-82: LI   R3, 17             # R3 = 17 (address 10)
-83: SW   R3, R3             # Store comparison
-84: BEQ  R3, R3, R3         # Branch based on comparison
 
-# ===== COMPARE AND UPDATE MAX =====
-85: LI   R2, 18             # R2 = 18 (address 14)
-86: LI   R3, 18             # R3 = 18
-87: LW   R3, R3             # R3 = count
-88: LW   R2, R2             # R2 = max
-89: XOR  R3, R2, R3         # R3 = count ^ max
-90: LI   R3, 17             # R3 = 17 (address 10)
-91: SW   R3, R3             # Store comparison
-92: BEQ  R3, R3, R3         # Branch based on comparison
+# reset distance accumulator for a new pair
+031: LI R0, 1
+032: LI R2, 18
+033: ADD R2, R0, R0
+034: LI R2, 12
+035: SW R0, R2          # mem[12] = 1
 
-# ===== INCREMENT j AND LOOP BACK =====
-93: LI   R2, 18             # R2 = 18 (address 10)
-94: LI   R3, 18             # R3 = 18
-95: LW   R2, R2             # R2 = 1 (constant ONE)
-96: LI   R3, 17             # R3 = 17 (address 10)
-97: LW   R3, R3             # R3 = j
-98: ADD  R2, R3, R2         # R2 = j + 1
-99: LI   R3, 17             # R3 = 17 (address 10)
-100: SW   R2, R3            # mem[10] = j++ (update j)
-101: LI   R2, 1             # R2 = 1
-102: LI   R2, 24            # R2 = 24 (INNER loop address)
-103: BEQ  R3, R3, R3        # Jump back to INNER
 
-# ===== NEXT_I: INCREMENT i =====
-104: NEXT_I:
-105: LI   R2, 15            # R2 = 15
-106: LI   R3, 20            # R3 = 20 (address 13)
-107: LW   R3, R3            # R3 = 15 (loop bound)
-108: LI   R2, 0             # R2 = 0
-109: LI   R3, 19            # R3 = 19 (address 12)
-110: LW   R3, R3            # R3 = i
-111: LI   R2, 0             # R2 = 0
-112: SW   R2, R3            # Update i
-113: LW   R3, R3            # Load i
-114: BEQ  R3, R3, R3        # Jump back to OUTER
+# prepare scratch registers for bit-level hamming computation
+036: LI R2, 12
+037: LW R1, R2          # load current distance
+038: LI R0, 18
+039: LI R3, 16
+040: LI R2, 26
+041: LW R1, R2          # load loop-related value
+042: AND R0, R0, R0     # no-op / timing filler
 
-# ===== DONE: WRITE RESULTS =====
-115: DONE:
-116: LI   R2, 16            # R2 = 16 (address for min)
-117: LI   R2, 17            # R2 = 17 (address for max)
-118: SW   R2, R2            # mem[16] = min (final)
-119: SW   R2, R3            # mem[17] = max (final)
+043: LI R2, 11
+044: SW R0, R2          # mem[11] = working value
 
-# ===== HALT =====
-120: LI   R2, 0             # R2 = 0
-121: LI   R1, 0             # R1 = 0
-122: BEQ  R2, R2, R3        # done=1, halt processor
+045: LI R0, 0
+046: LI R2, 14
+047: SW R0, R2          # mem[14] = 0 (bit counter / temp accumulator)
+
+
+# inner loop: process one bit of the pair
+048: LI R1, 1
+049: LI R3, 18
+050: LI R2, 11
+051: LW R1, R2          # load working value
+052: LI R3, 26
+053: SUB R2, R0, R1     # compare bit / check condition
+054: LW R0, R3          # load loop control value
+055: ADD R1, R1, R1     # shift working value left
+
+056: LI R2, 14
+057: LW R0, R2          # load current bit count
+058: OR R1, R0, R1      # accumulate hamming difference
+059: LI R2, 14
+060: SW R1, R2          # store updated distance
+
+
+# unconditional jump to continue bit loop
+061: LI R3, 26
+062: BEQ R3, R3, R3     # always true, jump back to bit loop
+
+
+# shift scratch registers for next bit
+063: LI R0, 18
+064: LI R3, 18
+065: LI R2, 11
+066: LW R0, R2          # load working value
+067: SHL R0, R0, R0     # shift left
+068: LI R2, 11
+069: SW R0, R2          # store shifted value
+
+070: LI R0, 18
+071: LI R3, 18
+072: LI R2, 14
+073: LW R0, R2          # load distance accumulator
+074: SHL R0, R0, R0     # shift accumulator
+075: LI R2, 11
+076: SW R0, R2          # store back to working register
+
+
+# check if bit loop should exit
+077: LI R3, 26
+078: BEQ R3, R0, R1     # branch when bit-processing is complete
+
+
+# load current distance and compare against min/max
+079: LI R0, 18
+080: LI R3, 18
+081: LI R2, 14
+082: LW R0, R2          # R0 = computed distance
+083: LI R1, 31
+084: LI R2, 16
+085: BEQ R3, R3, R3     # unconditional jump to update logic
+
+
+# update min/max candidate paths
+086: LI R0, 19
+087: LI R3, 19
+088: LI R2, 13
+089: LW R0, R2          # load comparison value
+090: OR R2, R0, R1
+
+091: LI R3, 17
+092: LI R2, 14
+093: LW R0, R2          # load distance
+094: BEQ R3, R0, R1     # branch based on comparison result
+
+
+# alternate update path
+095: LI R0, 18
+096: LI R3, 18
+097: LI R2, 13
+098: LW R0, R2
+099: OR R2, R0, R1
+
+100: LI R3, 17
+101: LI R2, 14
+102: LW R0, R2
+103: BEQ R3, R2, R3     # branch to next control state
+
+
+# store updated min distance
+104: LI R0, 18
+105: LI R3, 18
+106: ADD R2, R0, R0
+107: LI R2, 12
+108: SW R0, R2          # mem[12] = updated min distance
+
+
+# store updated max distance
+109: LI R0, 17
+110: LI R3, 17
+111: ADD R2, R0, R0
+112: LI R2, 10
+113: SW R0, R2          # mem[10] = updated max distance
+
+
+# advance to next pair or loop back
+114: LI R3, 25
+115: BEQ R3, R0, R1     # branch to next pair
+
+
+# check outer loop termination
+116: LI R0, 15
+117: LI R3, 28
+118: LI R2, 12
+119: LW R1, R2
+120: LI R1, 31
+121: LI R3, 21
+122: BEQ R0, R3, R3     # jump when all pairs processed
+
+
+# final writeback of results
+123: LI R0, 19
+124: LI R3, 19
+125: ADD R2, R0, R0
+126: LI R2, 12
+127: SW R0, R2          # write final min distance
+
+128: LI R3, 27
+129: BEQ R3, R2, R3     # jump to final store
+
+
+# store results to output locations
+130: LI R0, 16
+131: LI R2, 17
+132: LI R2, 8
+133: SW R0, R2          # write min distance to memory
+
+134: LI R2, 8
+135: SW R1, R2          # write max distance to memory
+
+136: END                # program finished
