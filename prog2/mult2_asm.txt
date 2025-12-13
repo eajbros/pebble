@@ -1,63 +1,63 @@
-# 8-bit Unsigned Multiplication (Basic Version)
-# A * B using repeated addition
+# 8-bit Unsigned Multiplication with Carry Propagation
+# A * B using repeated addition with 16-bit result
 # Input: mem[0]=A (multiplicand), mem[1]=B (multiplier)
-# Output: mem[2]=high byte (always 0), mem[3]=low byte
-# Limitation: Only handles products ≤ 255
+# Output: mem[2]=high byte, mem[3]=low byte
 #
 # Algorithm:
-#   result = 0
+#   result_high = 0
+#   result_low = 0
 #   for (counter = B; counter > 0; counter--)
-#       result += A
+#       old_low = result_low
+#       result_low += A
+#       if (result_low < old_low)  // carry occurred
+#           result_high += 1
 #
 # Memory usage:
 #   mem[0] = A (input)
 #   mem[1] = B (input)
-#   mem[2] = result high byte (output, always 0)
+#   mem[2] = result high byte (output)
 #   mem[3] = result low byte (output)
 #   mem[4] = loop counter (decrements from B to 0)
 
-# PC  Instruction         Binary        Description
-# --  -----------------   ------------  ---------------------------------
-# Initialize result bytes to 0
-0:    LI R0, 0            010000000     # R0 = 0 (for initialization)
-1:    LI R2, 2            011000010     # R2 = 2 (address)
-2:    SW R0, R2           100001000     # mem[2] = 0 (high byte)
-3:    LI R2, 3            011000011     # R2 = 3 (address)
-4:    SW R0, R2           100001000     # mem[3] = 0 (low byte)
 
-# Initialize counter = B
-5:    LI R2, 1            011000001     # R2 = 1 (address of B)
-6:    LW R1, R2           101011000     # R1 = mem[1] = B
-7:    LI R3, 4            011100100     # R3 = 4 (counter address)
-8:    SW R1, R3           100011100     # mem[4] = B (initialize counter)
 
-# LOOP: Check if counter == 0
-9:    LW R1, R3           101011100     # R1 = mem[4] = counter
-10:   LI R0, 0            010000000     # R0 = 0
-11:   LI R2, 28           011011100     # R2 = 28 (DONE address)
-12:   BEQ R1, R0, R2      110010010     # if counter+0==0, goto DONE
-
-# Load A and add to result_low
-13:   LI R2, 0            011000000     # R2 = 0 (address of A)
-14:   LW R0, R2           101001000     # R0 = mem[0] = A
-15:   LI R2, 3            011000011     # R2 = 3 (result_low address)
-16:   LW R1, R2           101011000     # R1 = mem[3] = current result
-17:   ADD R0, R0, R1      000000100     # R0 = A + result
-18:   SW R0, R2           100001000     # mem[3] = new result
-
-# Decrement counter
-19:   LI R3, 4            011100100     # R3 = 4 (counter address)
-20:   LW R1, R3           101011100     # R1 = mem[4] = counter
-21:   LI R0, 1            010000001     # R0 = 1
-22:   SUB R1, R1, R0      000011001     # R1 = counter - 1
-23:   SW R1, R3           100011100     # mem[4] = counter - 1
-
-# Unconditional jump to LOOP
-24:   LI R0, 0            010000000     # R0 = 0
-25:   LI R2, 9            011001001     # R2 = 9 (LOOP address)
-26:   BEQ R0, R0, R2      110000010     # goto LOOP (0+0==0 always)
-
-# DONE: Halt
-27:   BEQ R0, R0, R0      111000000     # Halt
-
-# Total: 28 instructions (lines 0-27)
+# Annotated assembly for 8-bit unsigned multiply with carry propagation
+LI R0, 0        # R0 = 0 (for initialization)
+LI R2, 2        # R2 = 2 (address)
+SW R0, R2       # mem[2] = 0 (high byte)
+LI R2, 3        # R2 = 3 (address)
+SW R0, R2       # mem[3] = 0 (low byte)
+LI R2, 1        # R2 = 1 (address of B)
+LW R1, R2       # R1 = mem[1] = B
+LI R3, 4        # R3 = 4 (counter address)
+SW R1, R3       # mem[4] = B (initialize counter)
+LI R3, 4        # R3 = 4 (counter address, reload before use)
+LW R1, R3       # R1 = mem[4] = counter
+LI R0, 19       # R0 = 19 (address of HALT)
+ADD R0, R0, R2  # R0 = R0 + R2 (compute jump address)
+LI R0, 0        # R0 = 0 (for comparison)
+BEQ R1, R0, R2  # if counter == 0, goto HALT
+LI R2, 0        # R2 = 0 (address of A)
+LW R0, R2       # R0 = mem[0] = A
+LI R2, 3        # R2 = 3 (result_low address)
+LW R1, R2       # R1 = mem[3] = old_low
+ADD R0, R0, R1  # R0 = A + old_low = new_low
+SW R0, R2       # mem[3] = new_low
+SLT R2, R0, R1  # R2 = 1 if new_low < old_low (carry)
+LI R0, 0        # R0 = 0
+LI R1, 30       # R1 = 30 (skip carry address)
+BEQ R2, R0, R1  # if no carry, skip increment
+LI R2, 2        # R2 = 2 (high byte address)
+LW R1, R2       # R1 = mem[2] = high byte
+LI R0, 1        # R0 = 1
+ADD R0, R1, R0  # R0 = high byte + 1
+SW R0, R2       # mem[2] = new high byte
+LI R3, 4        # R3 = 4 (counter address)
+LW R1, R3       # R1 = mem[4] = counter
+LI R0, 1        # R0 = 1
+SUB R1, R0, R1  # R1 = counter - 1
+SW R1, R3       # mem[4] = counter
+LI R0, 0        # R0 = 0
+LI R2, 9        # R2 = 9 (loop start address)
+BEQ R0, R0, R2  # unconditional jump to loop start
+HALT            # end of program

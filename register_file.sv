@@ -15,8 +15,9 @@ module register_file(
 
   // synchronous write
   always_ff @(posedge clk)
-    if(write_enable)
+    if(write_enable) begin
       core[write_addr] <= write_data;
+    end
 
   // asynchronous read
   assign read_a_data = core[read_a];

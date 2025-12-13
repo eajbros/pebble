@@ -6,8 +6,12 @@ module prog_ctr(
   output logic[9:0] PC);
 
   always_ff @(posedge Clk)
-    if(Reset) PC <= 'b0;
-	else if(JumpEnable) PC <= JumpAddr;
-	else PC <= PC + 10'd1;
+    if(Reset) begin
+      PC <= 'b0;
+    end else if(JumpEnable) begin
+      PC <= JumpAddr;
+    end else begin
+      PC <= PC + 10'd1;
+    end
 
 endmodule

@@ -95,6 +95,26 @@ module TopLevel(
     .addr(PC),
     .instruction(mach_code)
   );
+  always_ff @(posedge clk) begin
+    // Decode and display instruction mnemonic and operands
+    unique case (mach_code[8:7])
+      2'b00: begin // R-type
+        case (mach_code[6:4])
+          default: ; // No operation
+        endcase
+      end
+      2'b01: begin // I-type (li)
+        ; // No operation
+      end
+      2'b10: begin // Mem-type
+        ; // No operation
+      end
+      2'b11: begin // Branch/Halt
+        ; // No operation
+      end
+      default: ;
+    endcase
+  end
 
   control CTRL1(
     .instruction(mach_code),

@@ -21,6 +21,11 @@ module data_mem(
       // Keep mem_core in sync for addresses 0-3
       if(DataAddress < 4)
         mem_core[DataAddress] <= DataIn;
+      // $display("[mem] WRITE: addr=%0d <= %0d", DataAddress, DataIn);
+      // if (DataAddress == 8'd2)
+      //   $display("[mem] hi <= %0d", DataIn);
+      // if (DataAddress == 8'd3)
+      //   $display("[mem] lo <= %0d", DataIn);
     end
   end
 
