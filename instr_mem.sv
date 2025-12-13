@@ -1,5 +1,4 @@
-// Instruction Memory Module
-// Reads machine_code.txt and output instruction at address
+
 module instr_mem #(
     parameter ADDR_WIDTH = 10,
     parameter DATA_WIDTH = 9,
@@ -8,15 +7,9 @@ module instr_mem #(
     input  logic [ADDR_WIDTH-1:0] addr,
     output logic [DATA_WIDTH-1:0] instruction
 );
-
     logic [DATA_WIDTH-1:0] mem [MEM_DEPTH-1:0];
-
-    // Load machine code from file
     initial begin
         $readmemb("instrs.txt", mem);
     end
-
-    // Output instruction at address
     assign instruction = mem[addr];
-
 endmodule
